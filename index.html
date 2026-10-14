@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<script>
+  (function() {
+    var GA_ID = 'G-Z8DRP0WN89';
+    var isLocalDev = ['localhost', '127.0.0.1', ''].includes(location.hostname);
+    if (isLocalDev) return;
+    try { if (/[?&]no_ga=0/.test(location.search)) localStorage.removeItem('no_ga'); if (/[?&]no_ga=1/.test(location.search)) localStorage.setItem('no_ga', '1'); if (localStorage.getItem('no_ga') === '1') return; } catch (e) {}
+    var gaQ = new URLSearchParams(location.search); if (gaQ.get('obs') === '1' || gaQ.get('no_ga') === '1') return;
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', GA_ID);
+    document.addEventListener('click', function(e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href*="booth.pm"]') : null;
+      if (!a) return;
+      gtag('event', 'booth_click', { link_url: a.href, link_id: a.id || '', link_text: (a.textContent || '').trim().slice(0, 40) });
+    });
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="インスタの分割投稿がずれにくい、3:4グリッド対応の無料の画像分割ツール。3分割・6分割・9分割、アプリ不要・登録不要。2025年1月から縦長(3:4)になったプロフィールのグリッドに合わせて切ります。4:5や正方形で投稿する場合も、グリッドで見える部分がつながるように分割。パノラマ写真のカルーセル分割(2〜5枚)、投稿する順番の番号つき。画像はアップロードされず、スマホでも使えます。Instagramとは関係のない非公式ツールです。">
+<link rel="canonical" href="https://uuhai0625.github.io/bunkatsu-toukou/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:title" content="分割投稿メーカー|インスタの3・6・9分割を3:4グリッドに合わせて作成(無料・アプリ不要)">
+<meta property="og:description" content="インスタの分割投稿がずれにくい、3:4グリッド対応の無料の画像分割ツール。3分割・6分割・9分割、アプリ不要・登録不要。2025年1月から縦長(3:4)になったプロフィールのグリッドに合わせて切ります。4:5や正方形で投稿する場合も、グリッドで見える部分がつながるように分割。パノラマ写真のカルーセル分割(2〜5枚)、投稿する順番の番号つき。画像はアップロードされず、スマホでも使えます。Instagramとは関係のない非公式ツールです。">
+<meta property="og:url" content="https://uuhai0625.github.io/bunkatsu-toukou/">
+<meta property="og:image" content="https://uuhai0625.github.io/bunkatsu-toukou/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<title>分割投稿メーカー|インスタの3・6・9分割を3:4グリッドに合わせて作成(無料・アプリ不要)</title>
+<style>
+  :root {
+    --bg: #f5f4fa;
+    --panel: #ffffff;
+    --border: #dfdcec;
+    --field-border: #625d78;
+    --text: #22202c;
+    --muted: #57536a;
+    --accent: #4b3f9c;
+    --accent-dark: #362b7a;
+    --soft: #ecebf8;
+    --ng: #b3261e;
+    --locked: #c4bfdc;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  header { background: var(--accent-dark); color: #fff; padding: 24px 20px 18px; text-align: center; }
+  header h1 { margin: 0 0 6px; font-size: 1.35rem; }
+  header p { margin: 0; font-size: .9rem; }
+  header .note { margin-top: 6px; font-size: .78rem; opacity: .9; }
+  main { max-width: 1080px; margin: 0 auto; padding: 22px 16px 50px; }
+  main > * { min-width: 0; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "img pv" "mode pv" "pos pv"; column-gap: 18px; align-items: start; }
+  .layout > * { min-width: 0; }
+  #img-card { grid-area: img; } #mode-card { grid-area: mode; } #pos-card { grid-area: pos; }
+  #pv-card { grid-area: pv; position: sticky; top: 12px; }
+  section.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+  section.card h2 { margin: 0 0 6px; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .desc { color: var(--muted); font-size: .84rem; margin: 0 0 12px; }
+  .fine { color: var(--muted); font-size: .8rem; margin: 8px 0 0; }
+  .badge { display: inline-block; font-size: .7rem; padding: 2px 8px; border-radius: 999px; background: #fff1cc; color: #7a5600; font-weight: bold; }
+  .hidden { display: none !important; }
+  label.field { display: block; margin-bottom: 12px; }
+  .lbl { font-size: .85rem; font-weight: bold; display: block; }
+  .hint { font-size: .78rem; color: var(--muted); font-weight: normal; display: block; margin-top: 2px; }
+  select, input[type=color] { margin-top: 5px; min-height: 44px; border: 1px solid var(--field-border); border-radius: 8px; font-size: 1rem; font-family: inherit; background: #fff; color: var(--text); }
+  select { width: 100%; padding: 8px 10px; }
+  input[type=range] { width: 100%; min-height: 36px; accent-color: var(--accent); }
+  input[type=range]:disabled { opacity: .4; }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .seg label { min-height: 44px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--field-border); border-radius: 8px; padding: 6px 12px; font-size: .86rem; cursor: pointer; background: #fff; }
+  .seg label.on { border-color: var(--accent); background: var(--soft); font-weight: bold; }
+  .seg label:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+  fieldset.plain { border: none; padding: 0; margin: 0 0 12px; min-width: 0; }
+  fieldset.plain legend { font-size: .85rem; font-weight: bold; padding: 0; margin-bottom: 5px; }
+  .row2 { display: flex; gap: 12px; }
+  .row2 > * { flex: 1; min-width: 0; }
+  .drop { display: block; position: relative; border: 2px dashed var(--locked); border-radius: 12px; padding: 22px 14px; text-align: center; background: #fbfaff; cursor: pointer; }
+  .drop.over { border-color: var(--accent); background: var(--soft); }
+  .drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn { min-height: 44px; padding: 9px 16px; border-radius: 8px; font-size: .88rem; cursor: pointer; border: 1px solid var(--field-border); background: #fff; color: var(--text); font-family: inherit; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: bold; }
+  .btn.small { min-height: 40px; padding: 6px 12px; font-size: .82rem; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn:focus-visible, a:focus-visible { outline: 2px solid var(--accent-dark); outline-offset: 2px; }
+  .btn-row .btn { flex: 1; }
+  .status { font-size: .82rem; color: var(--muted); margin-top: 6px; min-height: 1.2em; }
+  .status.err { color: var(--ng); font-weight: bold; }
+  .pv { border: 1px solid var(--border); border-radius: 8px; background: #e8e6f2; padding: 10px; display: flex; justify-content: center; }
+  .pv canvas { max-width: 100%; max-height: 55vh; width: auto; height: auto; display: block; }
+  .pv canvas.drag { touch-action: none; cursor: grab; }
+  .pv canvas.drag:active { cursor: grabbing; }
+  .order-note { font-size: .84rem; font-weight: bold; color: var(--accent-dark); margin: 0 0 8px; }
+  .tiles { display: grid; gap: 8px; margin-top: 8px; }
+  .tiles .tile { border: 1px solid var(--border); border-radius: 8px; padding: 6px; background: #fff; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .tiles img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  .tiles .no { font-size: .78rem; font-weight: bold; color: var(--accent-dark); }
+  .guide { font-size: .88rem; }
+  .guide h3 { font-size: .95rem; margin: 14px 0 4px; }
+  .guide ul, .guide ol { padding-left: 1.3em; margin: 6px 0; }
+  .guide li { margin: 4px 0; }
+  .guide table { border-collapse: collapse; font-size: .84rem; margin: 6px 0; }
+  .guide th, .guide td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+  .locked-panel { border: 1px dashed var(--locked); border-radius: 10px; padding: 16px; text-align: center; color: var(--muted); background: #fbfaff; }
+  .locked-panel .lead { color: var(--text); font-weight: bold; }
+  .locked-panel .feat-list { text-align: left; max-width: 620px; margin: 10px auto; font-size: .85rem; padding-left: 1.2em; }
+  .buy-btn { display: inline-block; margin-top: 8px; background: var(--accent-dark); color: #fff; font-weight: bold; padding: 11px 22px; border-radius: 999px; text-decoration: none; font-size: .9rem; }
+  footer { max-width: 1080px; margin: 0 auto; padding: 0 16px 40px; font-size: .8rem; color: var(--muted); }
+  footer a { color: var(--muted); }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "img" "mode" "pv" "pos"; }
+    #pv-card { position: static; }
+    .pv canvas { max-height: 42vh; }
+  }
+  @media (max-width: 600px) {
+    .row2 { flex-direction: column; gap: 0; }
+    section.card { padding: 16px 12px; }
+  }
+</style>
+<!--ANSHIN_CSS_START--><style>:root{--anshin-w:1048px;--anshin-pad:16px}.anshin-strip,.anshin{box-sizing:border-box;width:min(var(--anshin-w),calc(100% - 2 * var(--anshin-pad)));margin-left:auto;margin-right:auto}.anshin-strip{list-style:none;margin-top:10px;margin-bottom:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;font-size:.8rem;line-height:1.5}.anshin-strip li{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid rgba(20,120,90,.45);border-radius:999px;background:rgba(20,120,90,.07)}.anshin-strip li.anshin-more{border:0;background:none;padding:3px 2px}.anshin-strip a,.anshin a{color:inherit}.anshin{margin-top:18px;margin-bottom:18px;padding:14px 18px;border:1px solid rgba(20,120,90,.45);border-radius:10px;background:rgba(20,120,90,.05);font-size:.86rem;line-height:1.7}.anshin h2{font-size:1rem;margin:0 0 6px}.anshin p{margin:0 0 6px}.anshin ul{margin:0;padding-left:1.2em}.anshin li{margin:3px 0}.anshin details{margin-top:6px}.anshin summary{cursor:pointer;font-weight:bold}.anshin .anshin-meta{margin:8px 0 0;font-size:.8rem;opacity:.85}@media print{.anshin,.anshin-strip{display:none!important}}</style><!--ANSHIN_CSS_END-->
+<!--UPSELL_CSS_START--><style>.upsell-top{box-sizing:border-box;width:min(var(--anshin-w,880px),calc(100% - 2 * var(--anshin-pad,16px)));margin:12px auto 0;font-size:.85rem;line-height:1.6}.upsell-top a{color:inherit}.upsell-assure{list-style:none;margin:12px 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px;font-size:.8rem;line-height:1.5}.upsell-assure li{padding:3px 10px;border:1px solid rgba(20,120,90,.45);border-radius:12px;background:rgba(20,120,90,.06)}.upsell-terms{margin:8px 0 0;font-size:.78rem;line-height:1.6;opacity:.85}.upsell-toast{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);z-index:9999;box-sizing:border-box;width:min(520px,calc(100% - 24px));padding:14px 56px 14px 16px;border-radius:12px;background:#fff;color:#222;border:1px solid #c9c2d6;box-shadow:0 6px 24px rgba(0,0,0,.18);font-size:.88rem;line-height:1.6}.upsell-toast p{margin:0 0 6px;font-weight:bold}.upsell-toast ul{margin:0 0 10px;padding-left:1.2em}.upsell-toast li{margin:2px 0}.upsell-toast .upsell-note{display:block;margin-top:6px;font-size:.75rem;color:#555}.upsell-toast .upsell-go{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:8px;background:#c9283e;color:#fff;font-weight:bold;text-decoration:none}.upsell-toast .upsell-go:focus-visible,.upsell-toast .upsell-x:focus-visible{outline:3px solid #2560c4;outline-offset:2px}.upsell-toast .upsell-x{position:absolute;top:4px;right:4px;width:44px;height:44px;border:0;border-radius:8px;background:transparent;color:#555;font-size:1.3rem;line-height:1;cursor:pointer}.upsell-inline{white-space:nowrap;color:inherit;text-decoration:underline;text-underline-offset:2px}@media print{.upsell-top,.upsell-assure,.upsell-terms,.upsell-toast,.upsell-inline{display:none!important}}</style><!--UPSELL_CSS_END-->
+</head>
+<body>
+
+<header>
+  <h1>分割投稿メーカー(Instagram向け・画像分割)</h1>
+  <p>1枚の画像を3分割・6分割・9分割して、インスタのプロフィールでつながって見える分割投稿に。縦長(3:4)のグリッドに合わせて切るので、ずれにくくなります。パノラマのカルーセル分割も。登録不要・スマホでも使えます</p>
+  <p class="note">※固定(ピン留め)投稿や途中の投稿があると並びはずれます(下の「ずれるときは」)。Instagramとは関係のない非公式ツールです。</p>
+</header>
+<!--ANSHIN_STRIP_START-->
+<ul class="anshin-strip" aria-label="データの扱い">
+  <li><span aria-hidden="true">✓</span> 入力内容はこの端末の中だけで処理</li>
+  <li><span aria-hidden="true">✓</span> 登録・ログイン不要</li>
+  <li><span aria-hidden="true">✓</span> 仕組みを公開中</li>
+  <li class="anshin-more"><a href="#anshin">データの扱いをくわしく</a></li>
+</ul>
+<!--ANSHIN_STRIP_END-->
+<!--UPSELL_TOP_START--><p class="upsell-top no-print" id="upsellTop">このページは無料のまま使えます。機能を増やしたい方は <a href="#pro-section">買い切り版(¥100・1回払い)<span aria-hidden="true"> ↓</span></a></p><!--UPSELL_TOP_END-->
+
+<main>
+<div class="layout">
+
+  <section class="card" id="img-card">
+    <h2>① 画像を選ぶ</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="inFile" accept="image/png,image/jpeg,image/webp" aria-describedby="dropHint">
+      <strong id="dropTitle">ここを押して画像を選ぶ</strong><br><span class="hint" id="dropHint">パソコンはドラッグ&ドロップでもOK(PNG・JPEG・WebP)。画像はこの端末の中だけで処理し、アップロードしません</span>
+    </label>
+    <div class="status" id="imgSt" role="status"></div>
+  </section>
+
+  <section class="card" id="mode-card">
+    <h2>② 分け方</h2>
+    <fieldset class="plain">
+      <legend>作るもの</legend>
+      <div class="seg" id="modeSeg">
+        <label class="on"><input type="radio" name="mode" value="grid" checked> プロフィールの分割投稿(横3列)</label>
+        <label><input type="radio" name="mode" value="pano"> パノラマ(カルーセルで横につなぐ)</label>
+      </div>
+    </fieldset>
+    <div class="row2">
+      <label class="field" id="rowsField"><span class="lbl">段の数</span>
+        <select id="inRows">
+          <option value="1">1段(3分割)</option>
+          <option value="2">2段(6分割)</option>
+          <option value="3" selected>3段(9分割)</option>
+          
+        </select>
+      </label>
+      <label class="field hidden" id="panelsField"><span class="lbl">枚数</span>
+        <select id="inPanels">
+          <option value="2">2枚</option>
+          <option value="3" selected>3枚</option>
+          <option value="4">4枚</option>
+          <option value="5">5枚</option>
+          
+        </select>
+      </label>
+      <label class="field"><span class="lbl">1枚の形</span>
+        <select id="inRatio">
+          <option value="34">縦長 3:4(1080×1440・おすすめ)</option>
+          <option value="45">縦長 4:5(1080×1350)</option>
+          <option value="11">正方形 1:1(1080×1080)</option>
+        </select>
+        <span class="hint" id="ratioHint"></span>
+      </label>
+    </div>
+  </section>
+
+  <section class="card" id="pv-card">
+    <h2>③ 見本</h2>
+    <p class="order-note" id="orderNote"></p>
+    <div class="pv"><canvas id="cv" width="600" height="800" role="img" aria-label="分割の見本"></canvas></div>
+    <p class="fine" id="dragNote">画像を選ぶと、見本を指やマウスでドラッグして位置を動かせます。</p>
+  </section>
+
+  <section class="card" id="pos-card">
+    <h2>④ 位置と大きさ</h2>
+    <label class="field"><span class="lbl">拡大 <span id="zoomVal">100%</span></span><input type="range" id="inZoom" min="100" max="300" step="1" value="100"></label>
+    <div class="row2">
+      <label class="field"><span class="lbl">画像を左右に動かす</span><input type="range" id="inX" min="-100" max="100" step="1" value="0"></label>
+      <label class="field"><span class="lbl">画像を上下に動かす</span><input type="range" id="inY" min="-100" max="100" step="1" value="0"></label>
+    </div>
+    <p class="fine" id="posHint"></p>
+    <div class="row2">
+      <label class="field"><span class="lbl">画像の外の色</span><input type="color" id="inBg" value="#ffffff"><span class="hint">拡大を戻したときや、4:5・正方形の投稿を開いたときに左右のはしに出る色です</span></label>
+      <div class="btn-row" style="align-items:flex-end;"><button type="button" class="btn small" id="resetPos">位置を元に戻す</button></div>
+    </div>
+  </section>
+
+</div>
+
+  <section class="card" id="out-card">
+    <h2>⑤ 保存</h2>
+    <div class="btn-row" style="margin-top:0;">
+      <button type="button" class="btn primary" id="shareAllBtn" disabled>まとめて共有・保存</button>
+      
+    </div>
+    <p class="fine">スマホは「まとめて共有・保存」→「画像を保存」で写真に入ります。うまくいかないときは、下の画像を長押しして「写真に保存」(1枚ずつ)。共有先に選んだアプリ(LINE・クラウドなど)での扱いは、そのアプリの規約によります。</p>
+    <div class="status" id="outSt" role="status"></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section class="card" id="pro-section">
+    <h2>ZIPで一括保存・12/15分割・パノラマ10枚 <span class="badge">買い切り版 ¥100(税込)</span></h2>
+    <div class="locked-panel">
+      <p class="lead">パソコンで作って、投稿順の番号つきでまとめて保存。</p>
+      <p>このページの機能は無料でそのまま使えます。買い切り版(ダウンロード購入)では、次の機能が増えます:</p>
+      <ul class="feat-list">
+        <li><strong>ZIPで一括保存</strong>: 全部の画像を、投稿する順番の番号つきファイル名でまとめて保存</li>
+        <li><strong>4段(12分割)・5段(15分割)</strong>(無料版は3段・9分割まで)</li>
+        <li><strong>パノラマを10枚まで</strong>(無料版は5枚まで)</li>
+        <li><strong>パソコンで使うHTMLファイルです</strong>(スマホでの動作は保証していません)。ダブルクリックで開くだけ、ネットにつながっていなくても使えます</li>
+      </ul>
+<!--UPSELL_ASSURE_START--><ul class="upsell-assure" aria-label="買い切り版について"><li>¥100(税込)の1回払い・月額なし</li><li>パソコン向けのHTMLファイル(スマホでは開けない機種あり)</li><li>ネットにつながっていなくても動く</li><li>BOOTHで購入(クレジットカード・楽天ペイは手数料なし、コンビニ・銀行払いは別途手数料)</li></ul><!--UPSELL_ASSURE_END-->
+      <a class="buy-btn" href="https://uuhai0625.booth.pm/items/8990872" id="buyLink" target="_blank" rel="noopener">パソコン用の買い切り版を見る(BOOTH・新しいタブ)</a><!--UPSELL_TERMS_START--><p class="upsell-terms">販売者の情報・返品などの販売条件は、BOOTHの商品ページでご確認ください。BOOTHでの購入にはpixivのアカウントが必要です。</p><!--UPSELL_TERMS_END-->
+    </div>
+  </section>
+
+  <section class="card guide" id="guide">
+    <h2>インスタの分割投稿のやり方</h2>
+    <ol>
+      <li>①で画像を選び、②で「プロフィールの分割投稿」と段の数(3分割・6分割・9分割)を選びます。</li>
+      <li>③の見本(プロフィールに並んだときの見え方)を見ながら、④で位置と大きさを合わせます。</li>
+      <li>⑤で保存します。スマホは「まとめて共有・保存」から「画像を保存」を選ぶと、写真に入ります。</li>
+      <li><strong>1番から順に、1枚ずつ別々の投稿にします</strong>。最後に投稿した画像が、プロフィールの左上に来ます。</li>
+    </ol>
+    <h3>分割投稿がずれるときは</h3>
+    <ul>
+      <li><strong>グリッドの形が変わった</strong>: Instagramのプロフィールのグリッドは、2025年1月から正方形ではなく縦長(3:4)で表示されています。正方形で切った昔の分割画像は、左右が切れて合わなくなります。このツールは今の3:4に合わせて切ります。</li>
+      <li><strong>4:5や正方形で投稿したいとき</strong>: グリッドでは画像のまん中だけ(3:4の部分)が表示されます。このツールは見える部分がつながるように、となりの画像と少し重ねて切ります。</li>
+      <li><strong>固定(ピン留め)した投稿がある</strong>: 固定した投稿はいちばん前に並んだままなので、分割がずれます。投稿の間だけ固定を外しておくと安心です。</li>
+      <li><strong>順番を間違えた・ほかの投稿が挟まった</strong>: 2026年6月から、プロフィールで投稿を長押しして「グリッドを並べ替え」で並べ替えられるようになりました(順次配信のため、まだ出ていないアカウントもあります)。固定した投稿は並べ替えの対象外です。</li>
+      <li><strong>複数の画像を1つの投稿(カルーセル)にしない</strong>: グリッドには1枚目しか出ません。分割投稿は1枚ずつ別の投稿にします。</li>
+      <li><strong>予約投稿ツールを使う</strong>: ツールによっては3:4が4:5に切られることがあります。3:4で作ったときは、Instagramのアプリから直接投稿し、投稿画面で切り抜かれていないか確かめてください。</li>
+    </ul>
+    <h3>パノラマ(カルーセル)の分割</h3>
+    <ul>
+      <li>横長の写真を「パノラマ」で2〜5枚に分け、<strong>1つの投稿に番号の順でまとめて</strong>入れると、スワイプでつながって見えます(Instagramのカルーセルは1投稿20枚まで。予約投稿ツールは10枚までのことが多いです)。</li>
+      <li>カルーセルの画像は、すべて1枚目と同じ形にそろいます。3:4がフィードでいちばん大きく見え、グリッドでも切れません(予約投稿ツールを使うなら4:5)。</li>
+    </ul>
+    <h3>サイズの目安</h3>
+    <table>
+      <tr><th>形</th><th>1枚のサイズ</th><th>プロフィールでの見え方</th></tr>
+      <tr><td>3:4</td><td>1080×1440</td><td>そのまま全部見える</td></tr>
+      <tr><td>4:5</td><td>1080×1350</td><td>左右が約34pxずつ切れる(全体の約6%)</td></tr>
+      <tr><td>1:1</td><td>1080×1080</td><td>左右が135pxずつ切れる(全体の25%)</td></tr>
+    </table>
+    <p class="fine">Instagramの表示のしかたは変わることがあります(この説明は2026年10月に確認した情報です)。大事な投稿の前に、見え方を確かめてください。</p>
+    <h3>よくある疑問</h3>
+    <ul>
+      <li><strong>画像はどこかに送られる?</strong> 送られません。画像の読み込みも分割も、このブラウザの中だけで行います。「まとめて共有・保存」を押したときは、選んだアプリ(写真・LINEなど)に画像を渡します。</li>
+      <li><strong>パソコンで保存した画像をスマホで投稿するには?</strong> 保存した画像を、LINEやAirDrop・Googleドライブなどでスマホに送ってください。</li>
+      <li><strong>画質は落ちる?</strong> 分割した画像は1枚ずつ横1080pxで作ります。元の画像が小さいと、拡大したぶんぼやけます。</li>
+    </ul>
+  </section>
+
+</main>
+
+<!--ANSHIN_START-->
+<section class="anshin" id="anshin" aria-labelledby="anshin-title">
+  <h2 id="anshin-title">データの扱いについて</h2>
+  <p>このページには、入力した内容を受け取る仕組みがありません。文字も画像も、あなたのスマホやパソコンの中だけで処理されます。</p>
+  <ul>
+    <li>画像などのファイルを選んでも、アップロードはされません。端末の中で読み込んで処理します。</li>
+    <li>会員登録・ログイン・メールアドレスの入力はありません。</li>
+    <li>自分で確かめたい方へ: ページを開いたあと機内モードにしても、そのまま使えます。</li>
+  </ul>
+  <details>
+    <summary>もっとくわしく(保存・アクセス解析・公開について)</summary>
+    <ul>
+      <li>保存されるデータは、この端末のこのブラウザの中にだけ残ります(localStorage・sessionStorage)。共用のパソコンでは使い終わったら消してください。</li>
+      <li>アクセス解析(Google Analytics)のため、見たページのURL・参照元・端末やブラウザの種類・おおよその地域(IPアドレスから推定)・Cookieの識別子・BOOTHへのリンクのクリック・どのボタンを押したか(回数や選んだ設定を含む)がGoogleに送られます。目的は利用状況の把握です。入力した文字や画像は送りません。(<a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener">Googleによるデータの使用</a>/<a href="https://tools.google.com/dlpage/gaoptout?hl=ja" target="_blank" rel="noopener">計測を止めるアドオン</a>。止めてもツールはそのまま使えます)</li>
+      <li>このツールの結果や作成物は目安です。入稿・契約・販売などの前には、印刷所や公式の情報でご確認ください。</li>
+      <li>処理の中身はすべて公開しています(詳しい方向け: <a href="https://github.com/uuhai0625/bunkatsu-toukou" target="_blank" rel="noopener">GitHub</a>)。</li>
+    </ul>
+  </details>
+  <p class="anshin-meta">作っている人: ウーハイ(個人開発)/不具合・ご質問は<a href="https://x.com/uuhai0625" target="_blank" rel="noopener">X(@uuhai0625)</a>へ/<a href="https://uuhai0625.github.io/" target="_blank" rel="noopener">ほかのツール</a>/この説明の更新日: 2026-10-13</p>
+</section>
+<!--ANSHIN_END-->
+
+<footer>
+  <p id="privacyNote">本ツールは完全にブラウザ内で動作し、選んだ画像はどこにも送信されません。</p>
+  <p>Instagramは Instagram, LLC の商標です。本ツールはMeta・Instagramとは関係のない、個人が制作した非公式ツールです。</p>
+  <p><a href="https://uuhai0625.booth.pm/" target="_blank" rel="noopener">他のツールも見る(BOOTHショップ)</a></p>
+  <p>不具合・ご要望は X <a href="https://x.com/uuhai0625" target="_blank" rel="noopener">@uuhai0625</a> まで。</p>
+  <p class="related-tools no-print">関連する無料ツール: <a href="https://uuhai0625.github.io/watermark-maker/" target="_blank" rel="noopener">透かし入れツール</a> ・ <a href="https://uuhai0625.github.io/eigyobi-calendar/" target="_blank" rel="noopener">営業日カレンダー</a> ・ <a href="https://uuhai0625.github.io/vtuber-schedule/" target="_blank" rel="noopener">配信スケジュールメーカー</a> ・ <a href="https://uuhai0625.github.io/#free-tools">ツール一覧</a></p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var EDITION = "free"; // "full" で買い切り完全版
+
+  function track(name, params) {
+    if (!window.dataLayer) return;
+    (function () { window.dataLayer.push(arguments); })("event", name, params || {});
+  }
+  var $ = function (id) { return document.getElementById(id); };
+  function setSt(id, msg, err) { var e = $(id); if (!e) return; e.textContent = msg; e.classList.toggle("err", !!err); }
+
+  var MAX_ROWS = 3, MAX_PANELS = 5;
+  
+  var RATIOS = { "34": { w: 1080, h: 1440 }, "45": { w: 1080, h: 1350 }, "11": { w: 1080, h: 1080 } };
+  var MAX_PIXELS = 50000000, SHARE_MAX = 10;
+
+  var state = { mode: "grid", rows: 3, panels: 3, ratio: "34", zoom: 100, x: 0, y: 0, bg: "#ffffff" };
+  var img = null, pvImg = null, imgName = "image", imgUrl = "";
+
+  // ===== 分け方の計算 =====
+  // グリッドでは各投稿のまん中(3:4)だけが見える。見える部分どうしがつながるように、タイルは隣と重ねて切る
+  function layout() {
+    var R = RATIOS[state.ratio] || RATIOS["34"];
+    var tw = R.w, th = R.h, cols, rows, vw, vh;
+    if (state.mode === "grid") {
+      cols = 3; rows = Math.min(MAX_ROWS, state.rows);
+      vw = Math.min(tw, th * 3 / 4); vh = Math.min(th, tw * 4 / 3);
+    } else {
+      cols = Math.min(MAX_PANELS, state.panels); rows = 1;
+      vw = tw; vh = th;
+    }
+    return { tw: tw, th: th, cols: cols, rows: rows, vw: vw, vh: vh, mx: (tw - vw) / 2, my: (th - vh) / 2, W: cols * vw, H: rows * vh };
+  }
+  // 見える範囲(W×H)に画像をカバー表示したときの位置と大きさ(右へ動かすと画像の左側が見える)
+  function placement(L) {
+    if (!img) return null;
+    var s = Math.max(L.W / img.width, L.H / img.height) * state.zoom / 100;
+    var dw = img.width * s, dh = img.height * s;
+    return { x: (L.W - dw) / 2 * (1 - state.x / 100), y: (L.H - dh) / 2 * (1 - state.y / 100), w: dw, h: dh };
+  }
+  // 投稿の順番: グリッドは右下から(最後に投稿したものが左上)。パノラマは左から
+  function order(L) {
+    var list = [];
+    for (var r = 0; r < L.rows; r++) for (var c = 0; c < L.cols; c++) list.push({ r: r, c: c });
+    if (state.mode === "grid") list.reverse();
+    return list;
+  }
+  function renderTile(L, P, r, c) {
+    var cv = document.createElement("canvas");
+    cv.width = L.tw; cv.height = L.th;
+    var ctx = cv.getContext("2d");
+    ctx.fillStyle = state.bg; ctx.fillRect(0, 0, L.tw, L.th);
+    var sx = c * L.vw - L.mx, sy = r * L.vh - L.my;
+    if (P) { ctx.imageSmoothingQuality = "high"; ctx.drawImage(img, P.x - sx, P.y - sy, P.w, P.h); }
+    return cv;
+  }
+
+  // ===== 見本 =====
+  var cv = $("cv"), previewK = 1;
+  function drawPreview() {
+    var L = layout(), P = placement(L), src = pvImg || img;
+    var gap = 4;
+    var k = Math.min(600 / (L.cols * L.vw + gap * (L.cols - 1)), 900 / (L.rows * L.vh + gap * (L.rows - 1)));
+    var cw = L.vw * k, ch = L.vh * k;
+    cv.width = Math.round(L.cols * cw + gap * (L.cols - 1)); cv.height = Math.round(L.rows * ch + gap * (L.rows - 1));
+    var ctx = cv.getContext("2d");
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, cv.width, cv.height);
+    for (var r = 0; r < L.rows; r++) for (var c = 0; c < L.cols; c++) {
+      var x = c * (cw + gap), y = r * (ch + gap);
+      ctx.save(); ctx.beginPath(); ctx.rect(x, y, cw, ch); ctx.clip();
+      ctx.fillStyle = state.bg; ctx.fillRect(x, y, cw, ch);
+      if (P) ctx.drawImage(src, x + (P.x - c * L.vw) * k, y + (P.y - r * L.vh) * k, P.w * k, P.h * k);
+      ctx.restore();
+    }
+    order(L).forEach(function (t, i) {
+      var x = t.c * (cw + gap), y = t.r * (ch + gap), rad = Math.max(14, Math.min(cw, ch) * 0.12);
+      ctx.fillStyle = "rgba(54,43,122,.9)";
+      ctx.beginPath(); ctx.arc(x + rad + 6, y + rad + 6, rad, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#fff"; ctx.font = "700 " + Math.round(rad * 1.15) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(String(i + 1), x + rad + 6, y + rad + 7);
+    });
+    if (!img) {
+      ctx.fillStyle = "#7d77a0"; ctx.font = "700 22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("①で画像を選んでください", cv.width / 2, cv.height / 2);
+    }
+    previewK = k;
+    var n = L.cols * L.rows;
+    $("orderNote").textContent = state.mode === "grid"
+      ? "1番(右下)から順に投稿 → 最後の" + n + "番がプロフィールの左上になります"
+      : "1番から順に、1つの投稿(カルーセル)にまとめて入れます";
+    cv.setAttribute("aria-label", (state.mode === "grid" ? "プロフィールの分割投稿の見本: 横3列×" + L.rows + "段" : "パノラマの見本: " + L.cols + "枚") + (img ? "" : "(画像は未選択)"));
+    $("ratioHint").textContent = state.mode !== "grid"
+      ? "カルーセルは1枚目の形にそろいます。3:4がフィードでいちばん大きく見えます。"
+      : state.ratio === "34" ? "今のグリッドとぴったり同じ形です。" : "グリッドではまん中の3:4だけ見えます。見える部分がつながるように切ります。";
+    cv.classList.toggle("drag", !!img);
+    var spanX = P ? (P.w - L.W) / 2 : 0, spanY = P ? (P.h - L.H) / 2 : 0;
+    $("inX").disabled = !img || spanX < 0.5; $("inY").disabled = !img || spanY < 0.5;
+    $("posHint").textContent = img && (spanX < 0.5 || spanY < 0.5) ? "画像の形によっては、拡大しないと" + (spanX < 0.5 ? "左右" : "上下") + "には動かせません。" : "";
+    $("inX").setAttribute("aria-valuetext", state.x === 0 ? "中央" : (state.x > 0 ? "右へ" : "左へ") + Math.abs(state.x));
+    $("inY").setAttribute("aria-valuetext", state.y === 0 ? "中央" : (state.y > 0 ? "下へ" : "上へ") + Math.abs(state.y));
+  }
+
+  // ===== 分割した画像(全部を1080幅で作って持っておく。共有はすぐ呼べるように) =====
+  var tileTimer = null, tiles = [], buildSeq = 0, busy = false;
+  function renderTiles() { clearTimeout(tileTimer); setButtons(false); tileTimer = setTimeout(buildTiles, 350); }
+  function fileBase() { return Array.from(imgName.replace(/\.[^.]+$/, "").replace(/[\\/:*?"<>|\x00-\x1f]/g, "_")).slice(0, 30).join("") || "image"; }
+  function fileName(i, n) { return (state.mode === "grid" ? "分割" : "パノラマ") + "_" + String(i + 1).padStart(Math.max(2, String(n).length), "0") + "_" + fileBase() + ".jpg"; }
+  function toBlob(c) { return new Promise(function (res) { c.toBlob(function (b) { res(b); }, "image/jpeg", 0.95); }); }
+  function setButtons(on) {
+    var n = tiles.length;
+    $("shareAllBtn").disabled = !on || busy;
+    $("shareAllBtn").textContent = n > SHARE_MAX ? "まとめて共有は10枚まで" : "まとめて共有・保存";
+    if (n > SHARE_MAX) $("shareAllBtn").disabled = true;
+    
+  }
+  function clearTiles() {
+    tiles.forEach(function (t) { if (t.url) URL.revokeObjectURL(t.url); });
+    tiles = []; $("tiles").textContent = "";
+  }
+  function buildTiles() {
+    var seq = ++buildSeq;
+    clearTiles();
+    if (!img) { setButtons(false); return; }
+    var L = layout(), P = placement(L), ord = order(L), n = ord.length, out = [];
+    $("tiles").style.gridTemplateColumns = "repeat(" + Math.min(L.cols, 3) + ", minmax(0, 1fr))";
+    // 1枚ずつ順番に作って、作ったcanvasはすぐ手放す(スマホのメモリ対策)
+    var i = 0;
+    function next() {
+      if (seq !== buildSeq) return;
+      if (i >= n) { tiles = out; showTiles(n); setButtons(true); return; }
+      var t = ord[i], c = renderTile(L, P, t.r, t.c);
+      toBlob(c).then(function (b) {
+        c.width = c.height = 0;
+        if (seq !== buildSeq) return;
+        if (!b) { setSt("outSt", "画像を作れませんでした(メモリ不足の可能性)。画像を小さくするか、段の数を減らしてください。", true); tiles = []; setButtons(false); return; }
+        out.push({ blob: b, name: fileName(i, n), url: URL.createObjectURL(b) });
+        i++; next();
+      });
+    }
+    next();
+  }
+  function showTiles(n) {
+    var box = $("tiles");
+    tiles.forEach(function (t, i) {
+      var div = document.createElement("div"); div.className = "tile";
+      var no = document.createElement("span"); no.className = "no"; no.textContent = (i + 1) + "番目に投稿";
+      var im = document.createElement("img"); im.alt = (i + 1) + "番目に投稿する画像(長押しで保存できます)"; im.src = t.url;
+      var b = document.createElement("button"); b.type = "button"; b.className = "btn small"; b.textContent = "保存";
+      b.setAttribute("aria-label", (i + 1) + "番目の画像を保存");
+      b.addEventListener("click", function () {
+        download(t.blob, t.name);
+        setSt("outSt", (i + 1) + "番目を保存しました。iPhoneでは「ファイル」に入ることがあります(画像の長押しなら写真に保存できます)。");
+        track("split_save", { mode: state.mode, count: n, via: "one" });
+      });
+      div.appendChild(no); div.appendChild(im); div.appendChild(b);
+      box.appendChild(div);
+    });
+  }
+  function download(blob, name) {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  $("shareAllBtn").addEventListener("click", function () {
+    if (!tiles.length || busy) return;
+    var files = tiles.map(function (t) { return new File([t.blob], t.name, { type: "image/jpeg" }); });
+    if (!(navigator.canShare && navigator.canShare({ files: files }))) {
+      setSt("outSt", "この端末ではまとめて共有できません。下の画像を長押しして保存するか、「保存」で1枚ずつ保存してください。", true);
+      return;
+    }
+    busy = true; setButtons(true);
+    var done = function () { busy = false; setButtons(true); };
+    navigator.share({ files: files }).then(function () {
+      setSt("outSt", "共有しました。写真に入っていなければ、もう一度押して「画像を保存」を選んでください。");
+      track("split_save", { mode: state.mode, count: files.length, via: "share" });
+    }).catch(function (e) {
+      if (e && e.name === "AbortError") setSt("outSt", "共有をやめました。");
+      else if (e && e.name === "NotAllowedError") setSt("outSt", "共有できませんでした。もう一度押してください。", true);
+      else setSt("outSt", "共有できませんでした。下の画像を長押しして保存してください。", true);
+    }).then(done, done);
+  });
+
+  
+
+  // ===== 画像の読み込み =====
+  function makePreviewImage(im) {
+    var k = Math.min(1, 2000 / Math.max(im.width, im.height));
+    if (k >= 1) return im;
+    var c = document.createElement("canvas");
+    c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    return c;
+  }
+  function loadFile(f) {
+    if (!f) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(f.type)) { setSt("imgSt", "PNG・JPEG・WebPの画像を選んでください。", true); return; }
+    if (f.size > 40 * 1024 * 1024) { setSt("imgSt", "画像が大きすぎます(40MBまで)。", true); return; }
+    var url = URL.createObjectURL(f), im = new Image();
+    setSt("imgSt", "読み込んでいます…");
+    im.onload = function () {
+      if (im.width * im.height > MAX_PIXELS) { URL.revokeObjectURL(url); setSt("imgSt", "画像の画素数が多すぎます(5000万画素まで)。小さくしてから選んでください。", true); return; }
+      if (imgUrl) URL.revokeObjectURL(imgUrl);
+      imgUrl = url; img = im; pvImg = makePreviewImage(im); imgName = f.name || "image";
+      state.zoom = 100; state.x = 0; state.y = 0; syncPos();
+      $("dropTitle").textContent = "画像を選び直す(今: " + Array.from(imgName).slice(0, 24).join("") + ")";
+      var L = layout();
+      setSt("imgSt", "読み込みました(" + im.width + "×" + im.height + ")。" + (im.width < L.W * 0.6 ? "元の画像が小さめなので、分割すると少しぼやけます。" : ""));
+      drawPreview(); renderTiles();
+      track("split_image_load", {});
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); setSt("imgSt", "画像を読み込めませんでした。", true); };
+    im.src = url;
+  }
+  $("inFile").addEventListener("change", function () { loadFile(this.files && this.files[0]); this.value = ""; });
+  var drop = $("drop");
+  ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+  ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+  drop.addEventListener("drop", function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; loadFile(f); });
+
+  // ===== 設定 =====
+  function syncSeg() { document.querySelectorAll("#modeSeg label").forEach(function (l) { l.classList.toggle("on", l.querySelector("input").checked); }); }
+  function syncPos() { $("inZoom").value = state.zoom; $("inX").value = state.x; $("inY").value = state.y; $("zoomVal").textContent = state.zoom + "%"; }
+  function changed() { drawPreview(); renderTiles(); }
+  document.querySelectorAll("input[name=mode]").forEach(function (i) {
+    i.addEventListener("change", function () {
+      state.mode = this.value; syncSeg();
+      $("rowsField").classList.toggle("hidden", state.mode !== "grid");
+      $("panelsField").classList.toggle("hidden", state.mode === "grid");
+      changed();
+    });
+  });
+  $("inRows").addEventListener("change", function () { state.rows = Math.min(MAX_ROWS, +this.value || 3); changed(); });
+  $("inPanels").addEventListener("change", function () { state.panels = Math.min(MAX_PANELS, +this.value || 3); changed(); });
+  $("inRatio").addEventListener("change", function () { state.ratio = RATIOS[this.value] ? this.value : "34"; changed(); });
+  $("inZoom").addEventListener("input", function () { state.zoom = +this.value; $("zoomVal").textContent = state.zoom + "%"; changed(); });
+  $("inX").addEventListener("input", function () { state.x = +this.value; changed(); });
+  $("inY").addEventListener("input", function () { state.y = +this.value; changed(); });
+  $("inBg").addEventListener("input", function () { state.bg = this.value; changed(); });
+  $("resetPos").addEventListener("click", function () { state.zoom = 100; state.x = 0; state.y = 0; syncPos(); changed(); });
+
+  // 見本をドラッグして位置を動かす(画像を選んだあとだけ)
+  var drag = null;
+  cv.addEventListener("pointerdown", function (e) {
+    if (!img) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: state.x, sy: state.y };
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener("pointermove", function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var L = layout(), P = placement(L);
+    var rect = cv.getBoundingClientRect(), s = cv.width / rect.width;
+    var dx = (e.clientX - drag.x) * s / previewK, dy = (e.clientY - drag.y) * s / previewK;
+    var spanX = (P.w - L.W) / 2, spanY = (P.h - L.H) / 2;
+    if (spanX > 0.5) state.x = Math.round(Math.max(-100, Math.min(100, drag.sx + dx / spanX * 100)));
+    if (spanY > 0.5) state.y = Math.round(Math.max(-100, Math.min(100, drag.sy + dy / spanY * 100)));
+    syncPos(); drawPreview();
+  });
+  function endDrag(e) { if (drag && e.pointerId === drag.id) { drag = null; renderTiles(); } }
+  cv.addEventListener("pointerup", endDrag);
+  cv.addEventListener("pointercancel", endDrag);
+
+  if (EDITION === "full") {
+    $("pro-section").classList.add("hidden");
+  }
+  if (EDITION !== "full") {
+    $("privacyNote").innerHTML = '選んだ画像も入力した内容もどこにも送信されません(すべてこのブラウザの中で処理します)。このページでは利用状況の把握のためにアクセス解析(Google Analytics)を使っています。<a href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener">Googleによるデータの使用について</a>';
+  }
+
+  syncSeg(); syncPos();
+  drawPreview(); setButtons(false);
+})();
+</script>
+<!--UPSELL_JS_START-->
+<script>
+(function () {
+  "use strict";
+  var q = new URLSearchParams(location.search);
+  if (q.get("obs") === "1" || document.documentElement.classList.contains("obs")) return;
+  // 小さな案内(トースト)は、買い切り版がパソコン向けなので、マウス操作の広い画面でだけ出す
+  var pc = !!(window.matchMedia && matchMedia("(pointer:fine) and (min-width:720px)").matches);
+  var buy = document.getElementById("buyLink");
+  var pro = document.getElementById("pro-section");
+  if (!buy || !pro) return;
+  var FEATS = [];
+  var path = location.pathname.replace(/index\.html$/, "");
+  var KEY_CLOSED = "upsell_closed_until:" + path, KEY_SHOWN = "upsell_shown:" + path;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function sess(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); sessionStorage.setItem(k, v); } catch (e) { return null; } }
+  function gtagEv(name, p) { if (!window.dataLayer) return; (function () { window.dataLayer.push(arguments); })("event", name, p || {}); }
+
+  var shown = false;
+  function blocked() {
+    if (shown || sess(KEY_SHOWN) === "1") return true;
+    var until = Number(store(KEY_CLOSED) || 0);
+    return until && Date.now() < until;
+  }
+  function feats() {
+    if (FEATS.length) return FEATS;
+    var out = [];
+    var lis = pro.querySelectorAll(".feat-list li");
+    for (var i = 0; i < lis.length && out.length < 3; i++) {
+      var all = lis[i].textContent.replace(/\s+/g, " ").trim();
+      if (/スマホ|HTMLファイル|パソコンで使う/.test(all)) continue;
+      var st = lis[i].querySelectorAll("strong");
+      var t = st.length === 1 ? st[0].textContent : all.split(/[::。]/)[0];
+      t = t.replace(/[((][^()()]*[))]/g, "").replace(/\s+/g, " ").trim();
+      if (t.length > 40) t = t.slice(0, 39) + "…";
+      if (t) out.push(t);
+    }
+    return out;
+  }
+  // 「〜してください」「できません」など、失敗の表示が出ていたら案内しない
+  function failed() {
+    var els = document.querySelectorAll('[role="status"], [role="alert"], [aria-live]');
+    for (var i = 0; i < els.length; i++) {
+      if (pro.contains(els[i]) || !els[i].offsetParent) continue;
+      if (/ください|できません|できませんでした|失敗|ありません|エラー/.test(els[i].textContent)) return true;
+    }
+    return false;
+  }
+  function proVisible() {
+    var r = pro.getBoundingClientRect();
+    return r.top < innerHeight && r.bottom > 0;
+  }
+  function show(trigger) {
+    if (!pc || blocked() || (trigger === "action" && failed()) || proVisible()) return;
+    var list = feats();
+    if (!list.length) return;
+    shown = true;
+    sess(KEY_SHOWN, "1");
+    var box = document.createElement("aside");
+    box.className = "upsell-toast";
+    box.setAttribute("aria-label", "買い切り版のご案内");
+    box.setAttribute("aria-live", "polite");
+    document.body.appendChild(box);
+    var p = document.createElement("p");
+    p.textContent = trigger === "limit"
+      ? "この先は買い切り版の機能です。パソコン用の買い切り版(¥100・税込)なら:"
+      : "うまくできましたか? パソコン用の買い切り版(¥100・税込)なら、さらに:";
+    var ul = document.createElement("ul");
+    list.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+    var a = document.createElement("a");
+    a.className = "upsell-go";
+    a.id = "upsellToastLink";
+    a.href = buy.href;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = "BOOTHで見る(新しいタブ)";
+    var bg = getComputedStyle(buy).backgroundColor;
+    if (bg && !/rgba?\(0, 0, 0, 0\)|transparent/.test(bg)) a.style.background = bg;
+    var x = document.createElement("button");
+    x.type = "button";
+    x.className = "upsell-x";
+    x.setAttribute("aria-label", "この案内を閉じる");
+    x.textContent = "×";
+    function close(remember) {
+      if (box.parentNode) box.parentNode.removeChild(box);
+      document.removeEventListener("keydown", onKey);
+      if (remember) store(KEY_CLOSED, String(Date.now() + 7 * 864e5));
+    }
+    // Escはページ側の操作(選択解除など)にも使われるので、案内の中にフォーカスがある時だけ閉じる
+    function onKey(e) { if (e.key === "Escape" && box.contains(document.activeElement)) close(true); }
+    x.addEventListener("click", function () { close(true); });
+    a.addEventListener("click", function () { setTimeout(function () { close(false); }, 0); });
+    document.addEventListener("keydown", onKey);
+    setTimeout(function () {
+      var note = document.createElement("small");
+      note.className = "upsell-note";
+      note.textContent = "スマホではファイルを開けない機種があります";
+      box.appendChild(x); box.appendChild(p); box.appendChild(ul); box.appendChild(a); box.appendChild(note);
+    }, 50);
+    gtagEv("upsell_show", { trigger: trigger });
+  }
+
+  // 保存・コピー・印刷・書き出しを押した直後(結果を受け取れたタイミング)
+  var OK = /保存|コピー|印刷|書き出|ダウンロード|共有|PDF/;
+  var NG = /読み込|リセット|消|削除|このブラウザに保存|確認|イメージを見る|戻/;
+  document.addEventListener("click", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest("button, a[download], input[type=button], input[type=submit]") : null;
+    if (!el || el.closest("#pro-section, .upsell-toast, #anshin")) return;
+    var label = (el.textContent || el.value || "").replace(/\s+/g, " ");
+    if (!OK.test(label) || NG.test(label)) return;
+    setTimeout(function () { show("action"); }, 1500);
+  }, true);
+
+  // 無料版の上限まわり
+  // (1) ページが出す「買い切り版」の一文に、購入欄へのリンクを足す(スマホでも)。🔒のタブは薄く表示されているので入れない
+  // (2) 案内(パソコンのみ)は、はっきりした合図のときだけ出す: 🔒のクリック・買い切り版にふれたalert・
+  //     初めて出た「〜まで/のみ/以降/入っていません」の上限の一文(計算のたびに出る誘導文や、同じ文の描き直しでは出さない)
+  var SKIP = "#pro-section, .upsell-toast, .upsell-top, #anshin, a, button, label, select, option, h1, h2, h3, .badge, header, footer, nav, textarea, pre, code, [contenteditable], svg";
+  var LIMIT = /まで|のみ|以降|入っていません/;
+  var seenText = {}, ready = false;
+  function goPro(e) {
+    if (e) e.preventDefault();
+    pro.setAttribute("tabindex", "-1");
+    pro.scrollIntoView({ behavior: "smooth", block: "start" });
+    pro.focus({ preventScroll: true });
+  }
+  function linkify(root, deep) {
+    var limitHit = false;
+    var els = root.matches("p, div, span, li") ? [root] : [];
+    if (deep) els = els.concat([].slice.call(root.querySelectorAll("p, div, span, li")));
+    els.forEach(function (el) {
+      if (el.closest(SKIP) || el.closest('[role="radio"], [role="option"], [role="tab"], [role="button"], [tabindex]:not([tabindex="-1"])') || el.querySelector("a, button, p, div, li, input, label")) return;
+      // 選択肢の「○○(買い切り版)」ではなく、文として買い切り版にふれている要素だけ
+      var own = "";
+      for (var n = el.firstChild; n; n = n.nodeType === 1 && n.className === "upsell-inline" ? null : n.nextSibling) if (n.nodeType === 3) own += n.nodeValue;
+      own = own.trim();
+      if (own.indexOf("買い切り版") < 0 || /[((]買い切り版[))]$/.test(own) || /^🔒/.test(own)) return;
+      var key = own.replace(/\d+/g, "#");
+      if (ready && !seenText[key] && LIMIT.test(own) && !el.closest(".teaser, #teaser, [id$=teaser], #tz")) limitHit = true;
+      seenText[key] = 1;
+      if (el.querySelector(".upsell-inline")) return;
+      var a = document.createElement("a");
+      a.className = "upsell-inline";
+      a.href = "#pro-section";
+      a.setAttribute("aria-label", "くわしく:買い切り版の説明へ移動");
+      a.textContent = "くわしく";
+      var ar = document.createElement("span");
+      ar.setAttribute("aria-hidden", "true");
+      ar.textContent = " ↓";
+      a.appendChild(ar);
+      a.addEventListener("click", goPro);
+      el.appendChild(document.createTextNode(" "));
+      el.appendChild(a);
+    });
+    return limitHit;
+  }
+  linkify(document.body, true);
+  setTimeout(function () { ready = true; }, 1500);
+  var topLink = document.querySelector("#upsellTop a");
+  if (topLink) topLink.addEventListener("click", goPro);
+  new MutationObserver(function (ms) {
+    // 変わったところだけを調べる(足された要素はその中も、文字の変更は親要素だけ)
+    var hit = false, done = new Set();
+    function check(t, deep) {
+      if (!t || t.nodeType !== 1 || done.has(t) || t.closest(".upsell-toast")) return;
+      done.add(t);
+      if (linkify(t, deep)) hit = true;
+    }
+    ms.forEach(function (m) {
+      if (m.type === "characterData") { check(m.target.parentNode, false); return; }
+      check(m.target, false);
+      for (var i = 0; i < m.addedNodes.length; i++) if (m.addedNodes[i].nodeType === 1) check(m.addedNodes[i], true);
+    });
+    if (hit) setTimeout(function () { show("limit"); }, 800);
+  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  document.addEventListener("click", function (e) {
+    var el = e.target && e.target.closest ? e.target.closest("button, div, span, li") : null;
+    var first = el && el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild.nodeValue : "";
+    if (!/^\s*🔒/.test(first) || e.target.closest("#pro-section")) return;
+    if (pc) setTimeout(function () { show("limit"); }, 300); else goPro();
+  }, true);
+  var origAlert = window.alert;
+  window.alert = function (msg) {
+    var r = origAlert.apply(window, arguments);
+    if (/買い切り版/.test(String(msg))) setTimeout(function () { show("limit"); }, 300);
+    return r;
+  };
+})();
+</script>
+<!--UPSELL_JS_END-->
+</body>
+</html>
